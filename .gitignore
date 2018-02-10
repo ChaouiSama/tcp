@@ -32,4 +32,5 @@
 *.app
 
 libraries/SFML/*
-.vscode
+.vscode/*
+out/.vs/*

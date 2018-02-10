@@ -1,6 +1,6 @@
 #include "ServerManager.hpp"
 
-ServerManager::ServerManager(int port)
+ServerManager::ServerManager(unsigned short port)
 {
     mPort = port;
     NEXT_AVAILABLE_ID = 0;
@@ -14,7 +14,7 @@ ServerManager::~ServerManager()
 
 void ServerManager::run()
 {
-    if (mListener.listen(mPort) != sf::Socket::Done)
+    if (mListener.listen(mPort) != sf::TcpListener::Done)
     {
         std::cout << "Listener unable to listen on port: " << mPort << std::endl;
         //exit(-1);

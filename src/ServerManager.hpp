@@ -7,7 +7,7 @@
 class ServerManager
 {
 public:
-    ServerManager(int port);
+    ServerManager(unsigned short port);
     ~ServerManager();
 
     void run();
@@ -25,7 +25,7 @@ private:
     sf::TcpListener mListener;
     sf::SocketSelector mSelector;
 
-    int mPort;
+    unsigned short mPort;
     int NEXT_AVAILABLE_ID;
     int mClientId;
 
