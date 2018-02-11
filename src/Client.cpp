@@ -1,6 +1,8 @@
-#include "ClientNetworkManager.hpp"
+//#include "ClientNetworkManager.hpp"
 
 #include <SFML/Graphics.hpp>
+#include <SFML/Network.hpp>
+#include <iostream>
 
 int main(int argc, char* argv[])
 {
@@ -21,12 +23,24 @@ int main(int argc, char* argv[])
     sf::Sprite sprite;
     sf::Sprite sprite2;
 
-    ClientNetworkManager client;
+    //ClientNetworkManager client(address, port);
 
     sf::RenderWindow* window = new sf::RenderWindow(sf::VideoMode(WIDTH, HEIGHT, sf::VideoMode::getDesktopMode().bitsPerPixel), "test", sf::Style::Close, sf::ContextSettings(0, 0, 8, 1, 1, false));
     window->setFramerateLimit(60);
     
-    client.connect(address, port);
+    //client.connect();
+
+    sf::TcpSocket socket;
+    socket.setBlocking(false);
+
+    if (socket.connect(address, port) == sf::Socket::Done)
+    {
+        std::cout << "connected" << std::endl;
+    }
+    else
+    {
+        std::cout << "unable to connect" << std::endl;
+    }
     
     while (window->isOpen())
     {
@@ -37,15 +51,21 @@ int main(int argc, char* argv[])
             switch (event.type)
             {
             case sf::Event::Closed:
-                client.disconnect(my_client_id);
+                //client.disconnect(my_client_id);
                 window->close();
                 break;
                 
             case sf::Event::KeyPressed:
                 if (event.key.code == sf::Keyboard::Escape)
                 {
-                    client.disconnect(my_client_id);
-                    window->close();
+                    //client.disconnect(my_client_id);
+                    packet_type = 2;
+                    send_packet << packet_type << my_client_id;
+                    if (socket.send(send_packet) == sf::Socket::Done)
+                    {
+                        send_packet.clear();
+                        window->close();
+                    }
                 }
                 break;
 
@@ -54,38 +74,43 @@ int main(int argc, char* argv[])
             }
         }
 
-        receive_packet = client.receiveData();
-        receive_packet >> packet_type;
+        //receive_packet = client.receiveData();
+        //receive_packet >> packet_type;
 
-        switch (packet_type)
+        if (socket.receive(receive_packet) == sf::Socket::Done)
         {
-        case 0:
-            if (first_connection)
+            receive_packet >> packet_type;
+
+            switch (packet_type)
             {
-                first_connection = false;
-                receive_packet >> my_client_id;
-                receive_packet.clear();
-                std::cout << "my_client_id: " << my_client_id << std::endl;
-            }
-            else
-            {
+            case 0:
+                if (first_connection)
+                {
+                    first_connection = false;
+                    receive_packet >> my_client_id;
+                    receive_packet.clear();
+                    std::cout << "my_client_id: " << my_client_id << std::endl;
+                }
+                else
+                {
+                    receive_packet >> client_id;
+                    receive_packet.clear();
+                    std::cout << "client_id: " << client_id << std::endl;
+                }
+                break;
+
+            case 1:
+                break;
+
+            case 2:
                 receive_packet >> client_id;
                 receive_packet.clear();
-                std::cout << "client_id: " << client_id << std::endl;
+                std::cout << "deconnection packet received from client_id[" << client_id << "]" << std::endl;
+                break;
+
+            default:
+                break;
             }
-            break;
-
-        case 1:
-            break;
-
-        case 2:
-            receive_packet >> client_id;
-            receive_packet.clear();
-            std::cout << "deconnection packet received from client_id[" << client_id << "]" << std::endl;
-            break;
-
-        default:
-            break;
         }
 
         texture.loadFromFile("grid.png");

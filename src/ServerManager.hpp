@@ -7,7 +7,7 @@
 class ServerManager
 {
 public:
-    ServerManager(unsigned short port);
+    ServerManager(unsigned short& port);
     ~ServerManager();
 
     void run();
@@ -17,8 +17,9 @@ public:
     void handleDataTransfert();
     void handleDisconnection();
 
-    void sendToAll(sf::Packet packet);
-    void sendToAllExcept(sf::Packet packet, int client_id);
+    void sendToAll(sf::Packet& packet);
+    void sendToAllExcept(sf::Packet& packet, int& client_id);
+    void sendTo(sf::Packet& packet, int& client_id);
 
 private:
     sf::TcpSocket* mSocket;
