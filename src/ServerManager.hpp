@@ -3,6 +3,7 @@
 
 #include <SFML/Network.hpp>
 #include <iostream>
+#include <memory>
 
 class ServerManager
 {
@@ -37,6 +38,8 @@ private:
 
     sf::Packet mReceivePacket;
     sf::Packet mSendPacket;
+
+    sf::Mutex mMutex;
 
     std::map<int, sf::TcpSocket*> mClients;
 };

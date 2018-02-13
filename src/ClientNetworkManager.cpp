@@ -1,9 +1,7 @@
 #include "ClientNetworkManager.hpp"
 
-ClientNetworkManager::ClientNetworkManager(sf::IpAddress& address, unsigned short& port)
+ClientNetworkManager::ClientNetworkManager()
 {
-    mAddress = address;
-    mPort = port;
     mSocket->setBlocking(false);
 }
 
@@ -12,8 +10,11 @@ ClientNetworkManager::~ClientNetworkManager()
     delete mSocket;
 }
 
-void ClientNetworkManager::connect()
+void ClientNetworkManager::connect(sf::IpAddress& address, unsigned short& port)
 {
+    mAddress = address;
+    mPort = port;
+
     if (mSocket->connect(mAddress, mPort) == sf::Socket::Done)
     {
         std::cout << "connected to server " << mAddress << ":" << mPort << std::endl;

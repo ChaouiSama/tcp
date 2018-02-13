@@ -30,6 +30,7 @@ void ServerManager::handleReceive()
         if (mSelector.isReady(mListener))
         {
             mSocket = new sf::TcpSocket;
+            
             if (mListener.accept(*mSocket) == sf::TcpListener::Done)
             {
                 std::cout << "accepted" << std::endl;
@@ -58,20 +59,16 @@ void ServerManager::receiveAndGetPacketType()
         switch (mPacketType)
         {
         case 0:
-            //handleConnection();
-            break;
-
-        case 1:
             handleDataTransfert();
-            break;
-
-        case 2:
-            handleDisconnection();
             break;
 
         default:
             break;
         };
+    }
+    else if (mSocket->receive(mReceivePacket) == sf::Socket::Disconnected)
+    {
+        handleDisconnection();
     }
 }
 
@@ -86,15 +83,19 @@ void ServerManager::handleConnection()
     mSelector.add(*mSocket);
     sendToAll(mSendPacket);
     mReceivePacket.clear();
-    for (std::map<int, sf::TcpSocket*>::iterator iter(mClients.begin()); iter != mClients.end(); ++iter)
-    {
-        std::cout << iter->first << std::endl;
 
-        if (iter->first != NEXT_AVAILABLE_ID)
+    if (!mClients.empty())
+    {
+        for (std::map<int, sf::TcpSocket*>::iterator iter(mClients.begin()); iter != mClients.end(); ++iter)
         {
-            mPacketType = 0;
-            mSendPacket << mPacketType << iter->first;
-            sendTo(mSendPacket, NEXT_AVAILABLE_ID);
+            std::cout << iter->first << std::endl;
+
+            if (iter->first != NEXT_AVAILABLE_ID)
+            {
+                mPacketType = 0;
+                mSendPacket << mPacketType << iter->first;
+                sendTo(mSendPacket, NEXT_AVAILABLE_ID);
+            }
         }
     }
 }
@@ -110,15 +111,21 @@ void ServerManager::handleDataTransfert()
 
 void ServerManager::handleDisconnection()
 {
-    mReceivePacket >> mClientId;
-    mReceivePacket.clear();
+    mMutex.lock();
+    for (std::map<int, sf::TcpSocket*>::iterator iter(mClients.begin()); iter != mClients.end(); ++iter)
+    {
+        if (iter->second == mSocket)
+        {
+            mPacketType = 2;
+            mSendPacket << mPacketType << iter->first;
+            
+            mSelector.remove(*iter->second);
+            delete iter->second;
+            mClients.erase(iter);
 
-    mSelector.remove(*mClients.find(mClientId)->second);
-    delete mClients.find(mClientId)->second;
-    mClients.erase(mClients.find(mClientId));
-
-    mPacketType = 2;
-    mSendPacket << mPacketType << mClientId;
+        }
+    }
+    mMutex.unlock();
     sendToAll(mSendPacket);
 }
 
@@ -147,7 +154,7 @@ void ServerManager::sendToAllExcept(sf::Packet& packet, int& client_id)
     packet.clear();
 }
 
-void sendTo(sf::Packet& packet, int& client_id)
+void ServerManager::sendTo(sf::Packet& packet, int& client_id)
 {
     if (mClients.find(client_id)->second->send(packet) != sf::Socket::Done)
         std::cout << "unable to send packet to id[" << client_id << "]" << std::endl;

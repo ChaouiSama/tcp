@@ -1,8 +1,8 @@
-//#include "ClientNetworkManager.hpp"
+#include "ClientNetworkManager.hpp"
 
 #include <SFML/Graphics.hpp>
-#include <SFML/Network.hpp>
-#include <iostream>
+/*#include <SFML/Network.hpp>
+#include <iostream>*/
 
 int main(int argc, char* argv[])
 {
@@ -23,6 +23,8 @@ int main(int argc, char* argv[])
     sf::Sprite sprite;
     sf::Sprite sprite2;
 
+    std::vector<int> players;
+
     //ClientNetworkManager client(address, port);
 
     sf::RenderWindow* window = new sf::RenderWindow(sf::VideoMode(WIDTH, HEIGHT, sf::VideoMode::getDesktopMode().bitsPerPixel), "test", sf::Style::Close, sf::ContextSettings(0, 0, 8, 1, 1, false));
@@ -31,11 +33,12 @@ int main(int argc, char* argv[])
     //client.connect();
 
     sf::TcpSocket socket;
-    socket.setBlocking(false);
+    socket.setBlocking(true);
 
     if (socket.connect(address, port) == sf::Socket::Done)
     {
         std::cout << "connected" << std::endl;
+        socket.setBlocking(false);
     }
     else
     {
@@ -59,13 +62,16 @@ int main(int argc, char* argv[])
                 if (event.key.code == sf::Keyboard::Escape)
                 {
                     //client.disconnect(my_client_id);
-                    packet_type = 2;
+                    /*packet_type = 2;
                     send_packet << packet_type << my_client_id;
                     if (socket.send(send_packet) == sf::Socket::Done)
                     {
                         send_packet.clear();
                         window->close();
-                    }
+                    }*/
+                    socket.disconnect();
+                    //socket.close();
+                    window->close();
                 }
                 break;
 
@@ -90,12 +96,14 @@ int main(int argc, char* argv[])
                     receive_packet >> my_client_id;
                     receive_packet.clear();
                     std::cout << "my_client_id: " << my_client_id << std::endl;
+                    players.push_back(my_client_id);
                 }
                 else
                 {
                     receive_packet >> client_id;
                     receive_packet.clear();
                     std::cout << "client_id: " << client_id << std::endl;
+                    players.push_back(client_id);
                 }
                 break;
 
@@ -106,6 +114,7 @@ int main(int argc, char* argv[])
                 receive_packet >> client_id;
                 receive_packet.clear();
                 std::cout << "deconnection packet received from client_id[" << client_id << "]" << std::endl;
+                players.erase(std::find(players.begin(), players.end(), client_id));
                 break;
 
             default:
@@ -113,7 +122,13 @@ int main(int argc, char* argv[])
             }
         }
 
-        texture.loadFromFile("grid.png");
+        for (int i = 0; i < players.size(); ++i)
+        {
+            std::cout << players[i] << std::endl;
+        }
+
+        if (!texture.loadFromFile("grid.png"))
+            texture.loadFromFile("./data/grid.png");
         sprite.setTexture(texture);
         sprite.setPosition(0, 0);
         sprite2.setTexture(texture);

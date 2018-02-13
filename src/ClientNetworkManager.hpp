@@ -7,9 +7,9 @@
 class ClientNetworkManager
 {
 public:
-    ClientNetworkManager(sf::IpAddress& address, unsigned short& port);
+    ClientNetworkManager();
     ~ClientNetworkManager();
-    void connect();
+    void connect(sf::IpAddress& address, unsigned short& port);
     void sendData(sf::Packet& packet);
     sf::Packet receiveData();
     void disconnect(int& client_id);
