@@ -33,7 +33,7 @@ void ServerManager::handleReceive()
             
             if (mListener.accept(*mSocket) == sf::TcpListener::Done)
             {
-                std::cout << "accepted" << std::endl;
+                std::cout << "client accepted" << std::endl;
                 handleConnection();
             }
         }
@@ -57,7 +57,6 @@ void ServerManager::receiveAndGetPacketType()
     std::cout << mSocket->receive(mReceivePacket) << std::endl;
     if (mSocket->receive(mReceivePacket) == sf::Socket::Done)
     {
-        std::cout << "test1" << std::endl;
         mReceivePacket >> mPacketType;
 
         switch (mPacketType)
@@ -92,8 +91,6 @@ void ServerManager::handleConnection()
     {
         for (std::map<int, sf::TcpSocket*>::iterator iter(mClients.begin()); iter != mClients.end(); ++iter)
         {
-            std::cout << iter->first << std::endl;
-
             if (iter->first != NEXT_AVAILABLE_ID)
             {
                 mPacketType = 0;
@@ -122,6 +119,8 @@ void ServerManager::handleDisconnection()
         {
             mPacketType = 2;
             mSendPacket << mPacketType << iter->first;
+
+            std::cout << "client id[" << iter->first << "] has disconnected" << std::endl;
             
             mSelector.remove(*iter->second);
             iter->second->disconnect();
