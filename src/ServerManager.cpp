@@ -43,7 +43,9 @@ void ServerManager::handleReceive()
             {
                 if (mSelector.isReady(*iter->second))
                 {
+                    mSocket = iter->second;
                     receiveAndGetPacketType();
+                    break;
                 }
             }
         }
@@ -52,8 +54,10 @@ void ServerManager::handleReceive()
 
 void ServerManager::receiveAndGetPacketType()
 {
+    std::cout << mSocket->receive(mReceivePacket) << std::endl;
     if (mSocket->receive(mReceivePacket) == sf::Socket::Done)
     {
+        std::cout << "test1" << std::endl;
         mReceivePacket >> mPacketType;
 
         switch (mPacketType)
@@ -120,9 +124,10 @@ void ServerManager::handleDisconnection()
             mSendPacket << mPacketType << iter->first;
             
             mSelector.remove(*iter->second);
+            iter->second->disconnect();
             delete iter->second;
             mClients.erase(iter);
-
+            break;
         }
     }
     mMutex.unlock();
