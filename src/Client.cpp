@@ -1,12 +1,10 @@
 #include "Player.hpp"
-
-#include <SFML/Graphics.hpp>
-/*#include <SFML/Network.hpp>
-#include <iostream>*/
+#include "Graphics.hpp"
+#include <cmath>
 
 int main(int argc, char* argv[])
 {
-    const int WIDTH(842), HEIGHT(842);
+    const int WIDTH(762), HEIGHT(762);
     
     sf::IpAddress address("chaouisama.tk");
     unsigned short port(49300);
@@ -18,10 +16,7 @@ int main(int argc, char* argv[])
     sf::Packet send_packet, receive_packet;
 
     sf::Uint8 packet_type;
-
-    sf::Texture texture;
-    sf::Sprite sprite;
-    sf::Sprite sprite2;
+    sf::Uint8 action_type;
 
     Player player;
 
@@ -33,12 +28,14 @@ int main(int argc, char* argv[])
     sf::RenderWindow* window = new sf::RenderWindow(sf::VideoMode(WIDTH, HEIGHT, sf::VideoMode::getDesktopMode().bitsPerPixel), "test", sf::Style::Close, sf::ContextSettings(0, 0, 8, 1, 1, false));
     window->setFramerateLimit(60);
 
-    if (!texture.loadFromFile("grid.png"))
-        texture.loadFromFile("./data/grid.png");
-    sprite.setTexture(texture);
-    sprite.setPosition(0, 0);
-    sprite2.setTexture(texture);
-    sprite2.setPosition(420, 420);
+    Graphics graphics;
+
+    graphics.loadTexture("data/grid.png");
+
+    for (int i = 0; i <= 9; ++i)
+    {
+        graphics.makeSprite(i);
+    }
 
     sf::TcpSocket socket;
     socket.setBlocking(true);
@@ -79,39 +76,43 @@ int main(int argc, char* argv[])
             }
         }
 
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W) && window->hasFocus())
         {
             player.move(my_client_id, 0.0f, -10.0f);
             packet_type = 0;
+            action_type = 0;
             pos = player.getPosition(my_client_id);
-            send_packet << packet_type << my_client_id << pos.x << pos.y;
+            send_packet << packet_type << action_type << my_client_id << pos.x << pos.y;
             if (socket.send(send_packet) != sf::Socket::Done){}
             send_packet.clear();
         }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q) && window->hasFocus())
         {
             player.move(my_client_id, -10.0f, 0.0f);
             packet_type = 0;
+            action_type = 0;
             pos = player.getPosition(my_client_id);
-            send_packet << packet_type << my_client_id << pos.x << pos.y;
+            send_packet << packet_type << action_type << my_client_id << pos.x << pos.y;
             if (socket.send(send_packet) != sf::Socket::Done){}
             send_packet.clear();
         }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::S) && window->hasFocus())
         {
             player.move(my_client_id, 0.0f, 10.0f);
             packet_type = 0;
+            action_type = 0;
             pos = player.getPosition(my_client_id);
-            send_packet << packet_type << my_client_id << pos.x << pos.y;
+            send_packet << packet_type << action_type << my_client_id << pos.x << pos.y;
             if (socket.send(send_packet) != sf::Socket::Done){}
             send_packet.clear();
         }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::D) && window->hasFocus())
         {
             player.move(my_client_id, 10.0f, 0.0f);
             packet_type = 0;
+            action_type = 0;
             pos = player.getPosition(my_client_id);
-            send_packet << packet_type << my_client_id << pos.x << pos.y;
+            send_packet << packet_type << action_type << my_client_id << pos.x << pos.y;
             if (socket.send(send_packet) != sf::Socket::Done){}
             send_packet.clear();
         }
@@ -141,9 +142,21 @@ int main(int argc, char* argv[])
                 break;
 
             case 1:
-                receive_packet >> client_id >> x >> y;
+                receive_packet >> action_type >> client_id >> x >> y;
                 receive_packet.clear();
-                player.setPosition(client_id, x, y);
+                switch (action_type)
+                {
+                case 0:
+                    player.setPosition(client_id, x, y);
+                    break;
+
+                case 1:
+                    graphics.makeHitSprite((int)x + 10, (int)y + 10);
+                    break;
+
+                default:
+                    break;
+                }
                 break;
 
             case 2:
@@ -158,9 +171,22 @@ int main(int argc, char* argv[])
             }
         }
 
+        if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && window->hasFocus())
+        {
+            int x = (sf::Mouse::getPosition(*window).x / 38) + 1;
+            int y = (sf::Mouse::getPosition(*window).y / 38) + 1;
+            if (x <= 10 && y <= 10)
+                graphics.makeHitSprite(x, y);
+
+            packet_type = 0;
+            action_type = 1;
+            send_packet << packet_type << action_type << my_client_id << (float)x << (float)y;
+            if (socket.send(send_packet) != sf::Socket::Done){}
+            send_packet.clear();
+        }
+
         window->clear(sf::Color::White);
-        window->draw(sprite);
-        window->draw(sprite2);
+        graphics.draw(window);
         for (std::map<int, sf::CircleShape>::iterator iter(player.getPlayerList()->begin()); iter != player.getPlayerList()->end(); ++iter)
         {
             window->draw(iter->second);

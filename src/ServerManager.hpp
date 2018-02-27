@@ -35,6 +35,7 @@ private:
     float mY;
 
     sf::Uint8 mPacketType;
+    sf::Uint8 mActionType;
 
     sf::Packet mReceivePacket;
     sf::Packet mSendPacket;

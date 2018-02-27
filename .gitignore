@@ -34,3 +34,4 @@
 libraries/SFML/*
 .vscode/*
 out/.vs/*
+out/data/all

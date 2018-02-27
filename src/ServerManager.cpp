@@ -54,7 +54,6 @@ void ServerManager::handleReceive()
 
 void ServerManager::receiveAndGetPacketType()
 {
-    std::cout << mSocket->receive(mReceivePacket) << std::endl;
     if (mSocket->receive(mReceivePacket) == sf::Socket::Done)
     {
         mReceivePacket >> mPacketType;
@@ -103,10 +102,10 @@ void ServerManager::handleConnection()
 
 void ServerManager::handleDataTransfert()
 {
-    mReceivePacket >> mClientId >> mX >> mY;
+    mReceivePacket >> mActionType >> mClientId >> mX >> mY;
 
     mPacketType = 1;
-    mSendPacket << mPacketType << mClientId << mX << mY;
+    mSendPacket << mPacketType << mActionType << mClientId << mX << mY;
     sendToAllExcept(mSendPacket, mClientId);
 }
 
