@@ -86,16 +86,13 @@ void ServerManager::handleConnection()
     sendToAll(mSendPacket);
     mReceivePacket.clear();
 
-    if (!mClients.empty())
+    for (std::map<int, sf::TcpSocket*>::iterator iter(mClients.begin()); iter != mClients.end(); ++iter)
     {
-        for (std::map<int, sf::TcpSocket*>::iterator iter(mClients.begin()); iter != mClients.end(); ++iter)
+        if (iter->first != NEXT_AVAILABLE_ID)
         {
-            if (iter->first != NEXT_AVAILABLE_ID)
-            {
-                mPacketType = 0;
-                mSendPacket << mPacketType << iter->first;
-                sendTo(mSendPacket, NEXT_AVAILABLE_ID);
-            }
+            mPacketType = 0;
+            mSendPacket << mPacketType << iter->first;
+            sendTo(mSendPacket, NEXT_AVAILABLE_ID);
         }
     }
 }

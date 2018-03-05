@@ -12,7 +12,8 @@ public:
     void connect(sf::IpAddress& address, unsigned short& port);
     void sendData(sf::Packet& packet);
     sf::Packet receiveData();
-    void disconnect(int& client_id);
+    bool receiveData(sf::Packet* packet);
+    void disconnect(/*int& client_id*/);
 
 private:
     sf::TcpSocket* mSocket;

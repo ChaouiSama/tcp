@@ -2,7 +2,8 @@
 
 ClientNetworkManager::ClientNetworkManager()
 {
-    mSocket->setBlocking(false);
+    mSocket = new sf::TcpSocket;
+    mSocket->setBlocking(true);
 }
 
 ClientNetworkManager::~ClientNetworkManager()
@@ -12,16 +13,17 @@ ClientNetworkManager::~ClientNetworkManager()
 
 void ClientNetworkManager::connect(sf::IpAddress& address, unsigned short& port)
 {
-    mAddress = address;
-    mPort = port;
+    /*mAddress = address;
+    mPort = port;*/
 
-    if (mSocket->connect(mAddress, mPort) == sf::Socket::Done)
+    if (mSocket->connect(address, port) == sf::Socket::Done)
     {
-        std::cout << "connected to server " << mAddress << ":" << mPort << std::endl;
+        std::cout << "connected to server " << address << ":" << port << std::endl;
+        mSocket->setBlocking(false);
     }
     else
     {
-        std::cout << "unable to connect to server " << mAddress << ":" << mPort << std::endl;
+        std::cout << "unable to connect to server " << address << ":" << port << std::endl;
     }
 }
 
@@ -45,11 +47,27 @@ sf::Packet ClientNetworkManager::receiveData()
     }
 }
 
-void ClientNetworkManager::disconnect(int& client_id)
+bool ClientNetworkManager::receiveData(sf::Packet* packet)
 {
-    mPacketType = 2;
+    packet->clear();
+
+    if (mSocket->receive(*packet) == sf::Socket::Done)
+    {
+        std::cout << "packet successfully received" << std::endl;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+void ClientNetworkManager::disconnect(/*int& client_id*/)
+{
+    /*mPacketType = 2;
 
     mSendPacket << mPacketType << client_id;
 
-    sendData(mSendPacket);
+    sendData(mSendPacket);*/
+    mSocket->disconnect();
 }
