@@ -32,15 +32,27 @@ int main(int argc, char* argv[])
     int used_ship_parts(0);
     int ship_parts_placed_in_a_row(0);
     int prevX, prevY;
+    int dir(0);
+    bool is_ship_incorrect(false);
 
-    sf::RenderWindow* window = new sf::RenderWindow(sf::VideoMode(WIDTH, HEIGHT, sf::VideoMode::getDesktopMode().bitsPerPixel), "test", sf::Style::Close, sf::ContextSettings(0, 0, 8, 1, 1, false));
+    std::map<int, int> ships_available;
+
+    for (int i(2); i <= 5; ++i)
+    {
+        if (i == 3)
+            ships_available.emplace(i, 2);
+        else
+            ships_available.emplace(i, 1);
+    }
+
+    sf::RenderWindow *window = new sf::RenderWindow(sf::VideoMode(WIDTH, HEIGHT, sf::VideoMode::getDesktopMode().bitsPerPixel), "test", sf::Style::Close, sf::ContextSettings(0, 0, 8, 1, 1, false));
     window->setFramerateLimit(500);
 
     Graphics graphics;
 
     graphics.loadTexture("data/grid.png");
 
-    for (int i = 0; i <= 1; ++i)
+    for (int i(0); i <= 1; ++i)
     {
         graphics.makeGridSprite(i);
     }
@@ -91,7 +103,20 @@ int main(int argc, char* argv[])
             case sf::Event::MouseButtonReleased:
                 if (event.mouseButton.button == sf::Mouse::Button::Left)
                 {
+                    if (ships_available.find(ship_parts_placed_in_a_row)->second <= 0 || is_ship_incorrect)
+                    {
+                        graphics.removeShip(ship_parts_placed_in_a_row);
+                        max_ship_parts += ship_parts_placed_in_a_row;
+                    }
+
+                    if (!is_ship_incorrect)
+                    {
+                        ships_available.find(ship_parts_placed_in_a_row)->second--;
+                    }
+
                     ship_parts_placed_in_a_row = 0;
+                    dir = 0;
+                    is_ship_incorrect = false;
                 }
                 break;
 
@@ -202,13 +227,52 @@ int main(int argc, char* argv[])
             }
             else if (x > 10 && y > 10 && x <= 20 && y <= 20 && used_ship_parts < max_ship_parts)
             {
-                if ((x != prevX || y != prevY) && ship_parts_placed_in_a_row < 5)
+                for (std::map<int, int>::reverse_iterator iter(ships_available.rbegin()); iter != ships_available.rend(); ++iter)
                 {
-                    graphics.makeShipSprite(x, y);
-                    prevX = x;
-                    prevY = y;
-                    used_ship_parts++;
-                    ship_parts_placed_in_a_row++;
+                    if (iter->second > 0)
+                    {
+                        if ((x != prevX || y != prevY) && ship_parts_placed_in_a_row < iter->first)
+                        {
+                            if (ship_parts_placed_in_a_row == 1)
+                            {
+                                if (x == prevX && y != prevY)
+                                    dir = 1;
+                                else if (x != prevX && y == prevY)
+                                    dir = 2;
+                            }
+                            
+                            if (ship_parts_placed_in_a_row >= 1)
+                            {
+                                switch (dir)
+                                {
+                                case 1:
+                                    if (x != prevX && y == prevY)
+                                    {
+                                        is_ship_incorrect = true;
+                                    }
+                                    break;
+
+                                case 2:
+                                    if (x == prevX && y != prevY)
+                                    {
+                                        is_ship_incorrect = true;
+                                    }
+                                    break;
+
+                                default:
+                                    break;
+                                }
+                            }
+
+                            graphics.makeShipSprite(x, y);
+                            prevX = x;
+                            prevY = y;
+                            used_ship_parts++;
+                            ship_parts_placed_in_a_row++;
+                        }
+                        
+                        break;
+                    }
                 }
             }
         }

@@ -2,24 +2,21 @@
 
 ClientNetworkManager::ClientNetworkManager()
 {
-    mSocket = new sf::TcpSocket;
-    mSocket->setBlocking(true);
+    m_socket = new sf::TcpSocket;
+    m_socket->setBlocking(true);
 }
 
 ClientNetworkManager::~ClientNetworkManager()
 {
-    delete mSocket;
+    delete m_socket;
 }
 
-void ClientNetworkManager::connect(sf::IpAddress& address, unsigned short& port)
+void ClientNetworkManager::connect(sf::IpAddress &address, unsigned short &port)
 {
-    /*mAddress = address;
-    mPort = port;*/
-
-    if (mSocket->connect(address, port) == sf::Socket::Done)
+    if (m_socket->connect(address, port) == sf::Socket::Done)
     {
         std::cout << "connected to server " << address << ":" << port << std::endl;
-        mSocket->setBlocking(false);
+        m_socket->setBlocking(false);
     }
     else
     {
@@ -27,9 +24,9 @@ void ClientNetworkManager::connect(sf::IpAddress& address, unsigned short& port)
     }
 }
 
-void ClientNetworkManager::sendData(sf::Packet& packet)
+void ClientNetworkManager::sendData(sf::Packet &packet)
 {
-    if (mSocket->send(packet) == sf::Socket::Done)
+    if (m_socket->send(packet) == sf::Socket::Done)
     {
         packet.clear();
         std::cout << "packet successfully sent" << std::endl;
@@ -38,20 +35,20 @@ void ClientNetworkManager::sendData(sf::Packet& packet)
 
 sf::Packet ClientNetworkManager::receiveData()
 {
-    mReceivePacket.clear();
+    m_receive_packet.clear();
 
-    if (mSocket->receive(mReceivePacket) == sf::Socket::Done)
+    if (m_socket->receive(m_receive_packet) == sf::Socket::Done)
     {
         std::cout << "packet successfully received" << std::endl;
-        return mReceivePacket;
+        return m_receive_packet;
     }
 }
 
-bool ClientNetworkManager::receiveData(sf::Packet* packet)
+bool ClientNetworkManager::receiveData(sf::Packet *packet)
 {
     packet->clear();
 
-    if (mSocket->receive(*packet) == sf::Socket::Done)
+    if (m_socket->receive(*packet) == sf::Socket::Done)
     {
         std::cout << "packet successfully received" << std::endl;
         return true;
@@ -62,12 +59,7 @@ bool ClientNetworkManager::receiveData(sf::Packet* packet)
     }
 }
 
-void ClientNetworkManager::disconnect(/*int& client_id*/)
+void ClientNetworkManager::disconnect()
 {
-    /*mPacketType = 2;
-
-    mSendPacket << mPacketType << client_id;
-
-    sendData(mSendPacket);*/
-    mSocket->disconnect();
+    m_socket->disconnect();
 }

@@ -1,5 +1,5 @@
-#ifndef SERVER_MANAGER_HPP
-#define SERVER_MANAGER_HPP
+#ifndef SERVER_MANAGER_HPP_
+#define SERVER_MANAGER_HPP_
 
 #include <SFML/Network.hpp>
 #include <iostream>
@@ -18,31 +18,31 @@ public:
     void handleDataTransfert();
     void handleDisconnection();
 
-    void sendToAll(sf::Packet& packet);
-    void sendToAllExcept(sf::Packet& packet, int& client_id);
-    void sendTo(sf::Packet& packet, int& client_id);
+    void sendToAll(sf::Packet &packet);
+    void sendToAllExcept(sf::Packet &packet, int &client_id);
+    void sendTo(sf::Packet &packet, int &client_id);
 
 private:
-    sf::TcpSocket* mSocket;
-    sf::TcpListener mListener;
-    sf::SocketSelector mSelector;
+    sf::TcpSocket *m_socket;
+    sf::TcpListener m_listener;
+    sf::SocketSelector m_selector;
 
-    unsigned short mPort;
+    unsigned short m_port;
     int NEXT_AVAILABLE_ID;
-    int mClientId;
+    int m_client_id;
 
-    float mX;
-    float mY;
+    float m_x;
+    float m_y;
 
-    sf::Uint8 mPacketType;
-    sf::Uint8 mActionType;
+    sf::Uint8 m_packet_type;
+    sf::Uint8 m_action_type;
 
-    sf::Packet mReceivePacket;
-    sf::Packet mSendPacket;
+    sf::Packet m_receive_packet;
+    sf::Packet m_send_packet;
 
-    sf::Mutex mMutex;
+    sf::Mutex m_mutex;
 
-    std::map<int, sf::TcpSocket*> mClients;
+    std::map<int, sf::TcpSocket*> m_clients;
 };
 
-#endif /* SERVER_MANAGER_HPP */
+#endif /* SERVER_MANAGER_HPP_ */

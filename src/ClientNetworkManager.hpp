@@ -1,5 +1,5 @@
-#ifndef CLIENT_NETWORK_MANAGER_HPP
-#define CLIENT_NETWORK_MANAGER_HPP
+#ifndef CLIENT_NETWORK_MANAGER_HPP_
+#define CLIENT_NETWORK_MANAGER_HPP_
 
 #include <SFML/Network.hpp>
 #include <iostream>
@@ -9,22 +9,19 @@ class ClientNetworkManager
 public:
     ClientNetworkManager();
     ~ClientNetworkManager();
-    void connect(sf::IpAddress& address, unsigned short& port);
-    void sendData(sf::Packet& packet);
+    void connect(sf::IpAddress &address, unsigned short &port);
+    void sendData(sf::Packet &packet);
     sf::Packet receiveData();
-    bool receiveData(sf::Packet* packet);
-    void disconnect(/*int& client_id*/);
+    bool receiveData(sf::Packet *packet);
+    void disconnect();
 
 private:
-    sf::TcpSocket* mSocket;
+    sf::TcpSocket *m_socket;
 
-    sf::Uint8 mPacketType;
+    sf::Uint8 m_packet_type;
 
-    sf::IpAddress mAddress;
-    unsigned short mPort;
-
-    sf::Packet mSendPacket;
-    sf::Packet mReceivePacket;
+    sf::Packet m_send_packet;
+    sf::Packet m_receive_packet;
 };
 
-#endif /* CLIENT_NETWORK_MANAGER_HPP */
+#endif /* CLIENT_NETWORK_MANAGER_HPP_ */

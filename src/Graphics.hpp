@@ -1,5 +1,5 @@
-#ifndef GRAPHICS_HPP
-#define GRAPHICS_HPP
+#ifndef GRAPHICS_HPP_
+#define GRAPHICS_HPP_
 
 #include <SFML/Graphics.hpp>
 #include <iostream>
@@ -14,17 +14,17 @@ public:
     void makeGridSprite(int type);
     void makeHitSprite(int x, int y);
     void makeShipSprite(int x, int y);
+    void removeShip(int counter);
     sf::Vector2f getSpritePos(int type);
     void setSpritePos(int type, sf::Vector2f pos);
-    std::map<int, sf::Sprite>* getSpritesList();
+    std::map<int, sf::Sprite> *getSpritesList();
     void draw(sf::RenderWindow *window);
 
 private:
-    sf::Texture mTexture;
-    sf::Sprite mSprite;
+    sf::Texture m_texture;
+    sf::Sprite m_sprite;
 
-    //std::map<int, std::pair<sf::Sprite, sf::Transform>> mSprites;
-    std::map<int, sf::Sprite> mSprites;
+    std::map<int, sf::Sprite> m_sprites;
 };
 
-#endif /* GRAPHICS_HPP */
+#endif /* GRAPHICS_HPP_ */
