@@ -6,9 +6,9 @@
 int main(int argc, char* argv[])
 {
     const int WIDTH(762), HEIGHT(762);
-    
-    sf::IpAddress address("127.0.0.1");
-    unsigned short port(49300);
+
+    sf::IpAddress address("chaouisama.tk");
+    unsigned short port(3000);
 
     int my_client_id, client_id;
 
@@ -59,7 +59,7 @@ int main(int argc, char* argv[])
 
     ClientNetworkManager client;
     client.connect(address, port);
-    
+
     while (window->isOpen())
     {
         sf::Event event;
@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
                 client.disconnect();
                 window->close();
                 break;
-                
+
             case sf::Event::KeyPressed:
                 if (event.key.code == sf::Keyboard::Escape)
                 {
@@ -240,7 +240,7 @@ int main(int argc, char* argv[])
                                 else if (x != prevX && y == prevY)
                                     dir = 2;
                             }
-                            
+
                             if (ship_parts_placed_in_a_row >= 1)
                             {
                                 switch (dir)
@@ -270,7 +270,7 @@ int main(int argc, char* argv[])
                             used_ship_parts++;
                             ship_parts_placed_in_a_row++;
                         }
-                        
+
                         break;
                     }
                 }
@@ -283,7 +283,7 @@ int main(int argc, char* argv[])
         for (std::map<int, sf::CircleShape>::iterator iter(player.getPlayerList()->begin()); iter != player.getPlayerList()->end(); ++iter)
         {
             window->draw(iter->second);
-        } 
+        }
         window->display();
     }
 

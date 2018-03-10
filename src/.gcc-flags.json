@@ -1,0 +1,8 @@
+{
+    "execPath": "C:\\MinGW\\bin\\g++.exe",
+    "gccDefaultCFlags": "-Wall",
+    "gccDefaultCppFlags": "-Wall -std=c++11",
+    "gccErrorLimit": 15,
+    "gccIncludePaths": ".\\libraries\\SFML\\include",
+    "gccSuppressWarnings": true
+}
