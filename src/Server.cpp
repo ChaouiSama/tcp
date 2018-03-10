@@ -2,7 +2,7 @@
 
 int main(int argc, char* argv[])
 {
-    unsigned short port(3000);
+    unsigned short port(2000);
 
     ServerManager server(port);
 

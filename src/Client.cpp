@@ -8,7 +8,7 @@ int main(int argc, char* argv[])
     const int WIDTH(762), HEIGHT(762);
 
     sf::IpAddress address("chaouisama.tk");
-    unsigned short port(3000);
+    unsigned short port(2000);
 
     int my_client_id, client_id;
 
