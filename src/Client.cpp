@@ -16,6 +16,16 @@ int main(int argc, char* argv[])
 
     sf::Packet send_packet, receive_packet;
 
+    enum e_packets_types : sf::Uint8
+    {
+        PT_CLIENT_CONNECTION,
+        PT_DATA_TRANSFERT,
+        PT_CLIENT_DISCONNECTION,
+        PT_SHIPS_PLACEMENT,
+        PT_HIT_PLACEMENT,
+        PT_NEW_TURN
+    };
+
     sf::Uint8 packet_type;
     sf::Uint8 action_type;
 
@@ -28,25 +38,57 @@ int main(int argc, char* argv[])
 
     bool moving(false);
 
-    int max_ship_parts(17);
-    int used_ship_parts(0);
-    int ship_parts_placed_in_a_row(0);
-    int prevX, prevY;
-    int dir(0);
-    bool is_ship_incorrect(false);
+    struct s_ships_and_hits
+    {
+        int mouseX;
+        int mouseY;
+        int x;
+        int y;
 
-    std::map<int, int> ships_available;
+        int max_ship_parts = 17;
+        int used_ship_parts = 0;
+        int ship_parts_placed_in_a_row = 0;
+        int prevX, prevY;
+        int dir = 0;
+        bool is_ship_incorrect = false;
+        bool is_placement_over = false;
+
+        std::map<int, int> ships_available;
+
+        std::vector<std::vector<int>> *board;
+    };
+
+    s_ships_and_hits ships_and_hits;
 
     for (int i(2); i <= 5; ++i)
     {
         if (i == 3)
-            ships_available.emplace(i, 2);
+            ships_and_hits.ships_available.emplace(i, 2);
         else
-            ships_available.emplace(i, 1);
+            ships_and_hits.ships_available.emplace(i, 1);
+    }
+
+    enum e_game_states : sf::Uint8
+    {
+        GS_SHIPS_PLACEMENT,
+        GS_PLAYER1_TURN,
+        GS_PLAYER2_TURN
+    };
+
+    e_game_states game_state;
+
+    ships_and_hits.board = new std::vector<std::vector<int>>(10, std::vector<int>(10));
+
+    for (int i(0); i < ships_and_hits.board->size(); ++i)
+    {
+        for (int j(0); j < ships_and_hits.board->at(i).size(); ++j)
+        {
+            ships_and_hits.board->at(i).at(j) = 0;
+        }
     }
 
     sf::RenderWindow *window = new sf::RenderWindow(sf::VideoMode(WIDTH, HEIGHT, sf::VideoMode::getDesktopMode().bitsPerPixel), "test", sf::Style::Close, sf::ContextSettings(0, 0, 8, 1, 1, false));
-    window->setFramerateLimit(500);
+    window->setFramerateLimit(120);
 
     Graphics graphics;
 
@@ -81,42 +123,65 @@ int main(int argc, char* argv[])
                 }
                 break;
 
-            case sf::Event::KeyReleased:
-                if (event.key.code == sf::Keyboard::W && window->hasFocus())
-                {
-                    moving = false;
-                }
-                if (event.key.code == sf::Keyboard::Q && window->hasFocus())
-                {
-                    moving = false;
-                }
-                if (event.key.code == sf::Keyboard::S && window->hasFocus())
-                {
-                    moving = false;
-                }
-                if (event.key.code == sf::Keyboard::D && window->hasFocus())
-                {
-                    moving = false;
-                }
-                break;
-
             case sf::Event::MouseButtonReleased:
                 if (event.mouseButton.button == sf::Mouse::Button::Left)
                 {
-                    if (ships_available.find(ship_parts_placed_in_a_row)->second <= 0 || is_ship_incorrect)
+                    if (ships_and_hits.ships_available.find(ships_and_hits.ship_parts_placed_in_a_row)->second <= 0 || ships_and_hits.is_ship_incorrect)
                     {
-                        graphics.removeShip(ship_parts_placed_in_a_row);
-                        max_ship_parts += ship_parts_placed_in_a_row;
+                        graphics.removeShip(ships_and_hits.ship_parts_placed_in_a_row);
+                        ships_and_hits.max_ship_parts += ships_and_hits.ship_parts_placed_in_a_row;
                     }
 
-                    if (!is_ship_incorrect)
+                    if (!ships_and_hits.is_ship_incorrect)
                     {
-                        ships_available.find(ship_parts_placed_in_a_row)->second--;
+                        ships_and_hits.ships_available.find(ships_and_hits.ship_parts_placed_in_a_row)->second--;
+                        
+                        switch (ships_and_hits.dir)
+                        {
+                        case 1:
+                            for (int i(ships_and_hits.prevY - 10 - ships_and_hits.ship_parts_placed_in_a_row); i < ships_and_hits.prevY - 10; ++i)
+                            {
+                                ships_and_hits.board->at(i).at(ships_and_hits.prevX - 11) = 1;
+                            }
+                            break;
+
+                        case 2:
+                            for (int i(ships_and_hits.prevX - 10 - ships_and_hits.ship_parts_placed_in_a_row); i < ships_and_hits.prevX - 10; ++i)
+                            {
+                                ships_and_hits.board->at(ships_and_hits.prevY - 11).at(i) = 1;
+                            }
+                            break;
+
+                        default:
+                            break;
+                        }
                     }
 
-                    ship_parts_placed_in_a_row = 0;
-                    dir = 0;
-                    is_ship_incorrect = false;
+                    if (game_state == GS_SHIPS_PLACEMENT && ships_and_hits.used_ship_parts == ships_and_hits.max_ship_parts && !ships_and_hits.is_placement_over)
+                    {
+                        ships_and_hits.is_placement_over = true;
+                        packet_type = PT_DATA_TRANSFERT;
+                        action_type = PT_SHIPS_PLACEMENT;
+
+                        send_packet << packet_type << action_type << my_client_id;
+
+                        for (int i(0); i < ships_and_hits.board->size(); ++i)
+                        {
+                            for (int j(0); j < ships_and_hits.board->at(i).size(); ++j)
+                            {
+                                send_packet << ships_and_hits.board->at(i).at(j);
+                                std::cout << ships_and_hits.board->at(i).at(j) << ' ';
+                            }
+                            std::cout << std::endl;
+                        }
+
+                        //send_packet << ships_and_hits.board;
+                        client.sendData(send_packet);
+                    }
+
+                    ships_and_hits.ship_parts_placed_in_a_row = 0;
+                    ships_and_hits.dir = 0;
+                    ships_and_hits.is_ship_incorrect = false;
                 }
                 break;
 
@@ -125,43 +190,13 @@ int main(int argc, char* argv[])
             }
         }
 
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W) && window->hasFocus())
-        {
-            moving = true;
-            player.move(my_client_id, 0.0f, -10.0f);
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q) && window->hasFocus())
-        {
-            player.move(my_client_id, -10.0f, 0.0f);
-            moving = true;
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::S) && window->hasFocus())
-        {
-            player.move(my_client_id, 0.0f, 10.0f);
-            moving = true;
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::D) && window->hasFocus())
-        {
-            player.move(my_client_id, 10.0f, 0.0f);
-            moving = true;
-        }
-
-        if (moving)
-        {
-            packet_type = 0;
-            action_type = 0;
-            pos = player.getPosition(my_client_id);
-            send_packet << packet_type << action_type << my_client_id << pos.x << pos.y;
-            client.sendData(send_packet);
-        }
-
         if (client.receiveData(&receive_packet))
         {
             receive_packet >> packet_type;
 
-            switch (packet_type)
+            switch ((e_packets_types)packet_type)
             {
-            case 0:
+            case PT_CLIENT_CONNECTION:
                 if (first_connection)
                 {
                     first_connection = false;
@@ -179,17 +214,29 @@ int main(int argc, char* argv[])
                 }
                 break;
 
-            case 1:
-                receive_packet >> action_type >> client_id >> x >> y;
-                receive_packet.clear();
-                switch (action_type)
+            case PT_DATA_TRANSFERT:
+                receive_packet >> action_type;
+                switch ((e_packets_types)action_type)
                 {
-                case 0:
-                    player.setPosition(client_id, x, y);
+                case PT_HIT_PLACEMENT:
+                    receive_packet >> x >> y;
+                    receive_packet.clear();
+                    graphics.makeHitSprite((int)x + 10, (int)y + 10);
                     break;
 
-                case 1:
-                    graphics.makeHitSprite((int)x + 10, (int)y + 10);
+                case PT_NEW_TURN:
+                    receive_packet >> client_id;
+                    receive_packet.clear();
+                    if (client_id == my_client_id)
+                    {
+                        game_state = GS_PLAYER1_TURN;
+                        std::cout << "MY TURN !" << std::endl;
+                    }
+                    else
+                    {
+                        game_state = GS_PLAYER2_TURN;
+                        std::cout << "ENNEMY'S TURN !" << std::endl;
+                    }
                     break;
 
                 default:
@@ -197,11 +244,12 @@ int main(int argc, char* argv[])
                 }
                 break;
 
-            case 2:
+            case PT_CLIENT_DISCONNECTION:
                 receive_packet >> client_id;
                 receive_packet.clear();
                 std::cout << "deconnection packet received from client_id[" << client_id << "]" << std::endl;
-                player.getPlayerList()->erase(player.getPlayerList()->find(client_id));
+                //player.getPlayerList()->erase(player.getPlayerList()->find(client_id));
+                player.getPlayerList()->erase(std::find(player.getPlayerList()->begin(), player.getPlayerList()->end(), client_id));
                 break;
 
             default:
@@ -209,53 +257,66 @@ int main(int argc, char* argv[])
             }
         }
 
-        if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && window->hasFocus())
+        if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && window->hasFocus() && game_state == GS_PLAYER1_TURN)
         {
-            int mouseX = sf::Mouse::getPosition(*window).x;
-            int mouseY = sf::Mouse::getPosition(*window).y;
+            ships_and_hits.mouseX = sf::Mouse::getPosition(*window).x;
+            ships_and_hits.mouseY = sf::Mouse::getPosition(*window).y;
 
-            int x = (mouseX / 38) + 1;
-            int y = (mouseY / 38) + 1;
-            if (x > 0 && y > 0 && x <= 10 && y <= 10)
+            ships_and_hits.x = (ships_and_hits.mouseX / 38) + 1;
+            ships_and_hits.y = (ships_and_hits.mouseY / 38) + 1;
+
+            if (ships_and_hits.x > 0 && ships_and_hits.y > 0 && ships_and_hits.x <= 10 && ships_and_hits.y <= 10)
             {
-                graphics.makeHitSprite(x, y);
+                graphics.makeHitSprite(ships_and_hits.x, ships_and_hits.y);
 
-                packet_type = 0;
-                action_type = 1;
-                send_packet << packet_type << action_type << my_client_id << (float)x << (float)y;
+                packet_type = PT_DATA_TRANSFERT;
+                action_type = PT_HIT_PLACEMENT;
+                send_packet << packet_type << action_type << my_client_id << (float)ships_and_hits.x << (float)ships_and_hits.y;
                 client.sendData(send_packet);
+
+                game_state = GS_PLAYER2_TURN;
             }
-            else if (x > 10 && y > 10 && x <= 20 && y <= 20 && used_ship_parts < max_ship_parts)
+        }
+        
+        if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && window->hasFocus() && game_state == GS_SHIPS_PLACEMENT)
+        {
+            ships_and_hits.mouseX = sf::Mouse::getPosition(*window).x;
+            ships_and_hits.mouseY = sf::Mouse::getPosition(*window).y;
+
+            ships_and_hits.x = (ships_and_hits.mouseX / 38) + 1;
+            ships_and_hits.y = (ships_and_hits.mouseY / 38) + 1;
+
+            if (ships_and_hits.x > 10 && ships_and_hits.y > 10 && ships_and_hits.x <= 20 && ships_and_hits.y <= 20 && ships_and_hits.used_ship_parts < ships_and_hits.max_ship_parts)
             {
-                for (std::map<int, int>::reverse_iterator iter(ships_available.rbegin()); iter != ships_available.rend(); ++iter)
+                for (std::map<int, int>::reverse_iterator iter(ships_and_hits.ships_available.rbegin()); iter != ships_and_hits.ships_available.rend(); ++iter)
                 {
                     if (iter->second > 0)
                     {
-                        if ((x != prevX || y != prevY) && ship_parts_placed_in_a_row < iter->first)
+                        if ((ships_and_hits.x != ships_and_hits.prevX || ships_and_hits.y != ships_and_hits.prevY) && ships_and_hits.ship_parts_placed_in_a_row < iter->first)
                         {
-                            if (ship_parts_placed_in_a_row == 1)
+                            if (ships_and_hits.ship_parts_placed_in_a_row == 1)
                             {
-                                if (x == prevX && y != prevY)
-                                    dir = 1;
-                                else if (x != prevX && y == prevY)
-                                    dir = 2;
+                                if (ships_and_hits.x == ships_and_hits.prevX && ships_and_hits.y != ships_and_hits.prevY)
+                                    ships_and_hits.dir = 1;
+                                else if (ships_and_hits.x != ships_and_hits.prevX && ships_and_hits.y == ships_and_hits.prevY)
+                                    ships_and_hits.dir = 2;
                             }
 
-                            if (ship_parts_placed_in_a_row >= 1)
+                            if (ships_and_hits.ship_parts_placed_in_a_row >= 1)
                             {
-                                switch (dir)
+                                switch (ships_and_hits.dir)
                                 {
                                 case 1:
-                                    if (x != prevX && y == prevY)
+                                    if (ships_and_hits.x != ships_and_hits.prevX && ships_and_hits.y == ships_and_hits.prevY)
                                     {
-                                        is_ship_incorrect = true;
+                                        ships_and_hits.is_ship_incorrect = true;
                                     }
                                     break;
 
                                 case 2:
-                                    if (x == prevX && y != prevY)
+                                    if (ships_and_hits.x == ships_and_hits.prevX && ships_and_hits.y != ships_and_hits.prevY)
                                     {
-                                        is_ship_incorrect = true;
+                                        ships_and_hits.is_ship_incorrect = true;
                                     }
                                     break;
 
@@ -264,11 +325,11 @@ int main(int argc, char* argv[])
                                 }
                             }
 
-                            graphics.makeShipSprite(x, y);
-                            prevX = x;
-                            prevY = y;
-                            used_ship_parts++;
-                            ship_parts_placed_in_a_row++;
+                            graphics.makeShipSprite(ships_and_hits.x, ships_and_hits.y);
+                            ships_and_hits.prevX = ships_and_hits.x;
+                            ships_and_hits.prevY = ships_and_hits.y;
+                            ships_and_hits.used_ship_parts++;
+                            ships_and_hits.ship_parts_placed_in_a_row++;
                         }
 
                         break;
@@ -277,16 +338,12 @@ int main(int argc, char* argv[])
             }
         }
 
-
         window->clear(sf::Color::White);
         graphics.draw(window);
-        for (std::map<int, sf::CircleShape>::iterator iter(player.getPlayerList()->begin()); iter != player.getPlayerList()->end(); ++iter)
-        {
-            window->draw(iter->second);
-        }
         window->display();
     }
 
+    delete ships_and_hits.board;
     delete window;
 
     return 0;

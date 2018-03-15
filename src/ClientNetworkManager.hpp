@@ -23,5 +23,8 @@ private:
     sf::Packet m_send_packet;
     sf::Packet m_receive_packet;
 };
+    
+/*sf::Packet& operator <<(sf::Packet &packet, std::vector<std::vector<int>> &data);
+sf::Packet& operator >>(sf::Packet &packet, std::vector<std::vector<int>> &data);*/
 
 #endif /* CLIENT_NETWORK_MANAGER_HPP_ */
