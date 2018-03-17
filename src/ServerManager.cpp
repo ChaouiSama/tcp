@@ -146,7 +146,7 @@ void ServerManager::handleDataTransfert()
             if (iter->first != m_client_id)
             {
                 m_receive_packet.clear();
-                iter->second.at(m_y).at(m_x) = 2;
+                iter->second.at(m_y - 1).at(m_x - 1) = 2;
                 m_packet_type = PT_DATA_TRANSFERT;
                 m_action_type = PT_HIT_PLACEMENT;
                 m_send_packet << m_packet_type << m_action_type << m_x << m_y;
