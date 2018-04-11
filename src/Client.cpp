@@ -5,7 +5,7 @@
 
 int main(int argc, char* argv[])
 {
-    const int WIDTH(762), HEIGHT(762);
+    const int WIDTH(840), HEIGHT(382);
 
     sf::IpAddress address("chaouisama.tk");
     unsigned short port(2000);
@@ -33,6 +33,7 @@ int main(int argc, char* argv[])
 
     float x;
     float y;
+    bool hit(false);
 
     sf::Vector2f pos;
 
@@ -139,16 +140,16 @@ int main(int argc, char* argv[])
                         switch (ships_and_hits.dir)
                         {
                         case 1:
-                            for (int i(ships_and_hits.prevY - 10 - ships_and_hits.ship_parts_placed_in_a_row); i < ships_and_hits.prevY - 10; ++i)
+                            for (int i(ships_and_hits.prevY  - ships_and_hits.ship_parts_placed_in_a_row); i < ships_and_hits.prevY ; ++i)
                             {
-                                ships_and_hits.board->at(i).at(ships_and_hits.prevX - 11) = 1;
+                                ships_and_hits.board->at(i).at(ships_and_hits.prevX - 13) = 1;
                             }
                             break;
 
                         case 2:
-                            for (int i(ships_and_hits.prevX - 10 - ships_and_hits.ship_parts_placed_in_a_row); i < ships_and_hits.prevX - 10; ++i)
+                            for (int i(ships_and_hits.prevX - 12 - ships_and_hits.ship_parts_placed_in_a_row); i < ships_and_hits.prevX - 12; ++i)
                             {
-                                ships_and_hits.board->at(ships_and_hits.prevY - 11).at(i) = 1;
+                                ships_and_hits.board->at(ships_and_hits.prevY - 1).at(i) = 1;
                             }
                             break;
 
@@ -170,12 +171,9 @@ int main(int argc, char* argv[])
                             for (int j(0); j < ships_and_hits.board->at(i).size(); ++j)
                             {
                                 send_packet << ships_and_hits.board->at(i).at(j);
-                                std::cout << ships_and_hits.board->at(i).at(j) << ' ';
                             }
-                            std::cout << std::endl;
                         }
 
-                        //send_packet << ships_and_hits.board;
                         client.sendData(send_packet);
                     }
 
@@ -219,9 +217,12 @@ int main(int argc, char* argv[])
                 switch ((e_packets_types)action_type)
                 {
                 case PT_HIT_PLACEMENT:
-                    receive_packet >> x >> y;
+                    receive_packet >> client_id >> x >> y >> hit;
                     receive_packet.clear();
-                    graphics.makeHitSprite((int)x + 10, (int)y + 10);
+                    if (client_id == my_client_id)
+                        graphics.makeHitSprite((int)x, (int)y, hit);
+                    else
+                        graphics.makeHitSprite((int)x + 12, (int)y, hit);
                     break;
 
                 case PT_NEW_TURN:
@@ -230,12 +231,12 @@ int main(int argc, char* argv[])
                     if (client_id == my_client_id)
                     {
                         game_state = GS_PLAYER1_TURN;
-                        std::cout << "MY TURN !" << std::endl;
+                        graphics.makeTurnSprite(0);
                     }
                     else
                     {
                         game_state = GS_PLAYER2_TURN;
-                        std::cout << "ENNEMY'S TURN !" << std::endl;
+                        graphics.makeTurnSprite(1);
                     }
                     break;
 
@@ -248,7 +249,6 @@ int main(int argc, char* argv[])
                 receive_packet >> client_id;
                 receive_packet.clear();
                 std::cout << "deconnection packet received from client_id[" << client_id << "]" << std::endl;
-                //player.getPlayerList()->erase(player.getPlayerList()->find(client_id));
                 player.getPlayerList()->erase(std::find(player.getPlayerList()->begin(), player.getPlayerList()->end(), client_id));
                 break;
 
@@ -267,8 +267,6 @@ int main(int argc, char* argv[])
 
             if (ships_and_hits.x > 0 && ships_and_hits.y > 0 && ships_and_hits.x <= 10 && ships_and_hits.y <= 10)
             {
-                graphics.makeHitSprite(ships_and_hits.x, ships_and_hits.y);
-
                 packet_type = PT_DATA_TRANSFERT;
                 action_type = PT_HIT_PLACEMENT;
                 send_packet << packet_type << action_type << my_client_id << (float)ships_and_hits.x << (float)ships_and_hits.y;
@@ -286,7 +284,7 @@ int main(int argc, char* argv[])
             ships_and_hits.x = (ships_and_hits.mouseX / 38) + 1;
             ships_and_hits.y = (ships_and_hits.mouseY / 38) + 1;
 
-            if (ships_and_hits.x > 10 && ships_and_hits.y > 10 && ships_and_hits.x <= 20 && ships_and_hits.y <= 20 && ships_and_hits.used_ship_parts < ships_and_hits.max_ship_parts)
+            if (ships_and_hits.x > 12 && ships_and_hits.y > 0 && ships_and_hits.x <= 22 && ships_and_hits.y <= 10 && ships_and_hits.used_ship_parts < ships_and_hits.max_ship_parts)
             {
                 for (std::map<int, int>::reverse_iterator iter(ships_and_hits.ships_available.rbegin()); iter != ships_and_hits.ships_available.rend(); ++iter)
                 {

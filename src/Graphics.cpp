@@ -2,7 +2,7 @@
 
 Graphics::Graphics()
 {
-
+    m_sprite.setTexture(m_texture);
 }
 
 Graphics::~Graphics()
@@ -18,8 +18,6 @@ void Graphics::loadTexture(std::string path)
 
 void Graphics::makeGridSprite(int type)
 {
-    m_sprite.setTexture(m_texture);
-
     switch (type)
     {
     case 0:
@@ -30,27 +28,65 @@ void Graphics::makeGridSprite(int type)
 
     case 1:
         m_sprite.setTextureRect(sf::IntRect(0, 0, 382, 382));
-        m_sprite.setPosition(380, 380);
+        m_sprite.setPosition(382 + 76, 0);
         m_sprites.emplace(type, m_sprite);
         break;
 
     default:
         break;
     }
+
+    m_sprite.setTextureRect(sf::IntRect(794, 0, 76, 382));
+    m_sprite.setPosition(382, 0);
+    m_sprites.emplace(-1, m_sprite);
 }
 
-void Graphics::makeHitSprite(int x, int y)
+void Graphics::makeHitSprite(int x, int y, bool hit)
 {
-    m_sprite.setTextureRect(sf::IntRect(382, 0, 36, 36));
-    m_sprite.setPosition(x * 2 + (x - 1) * 36, y * 2 + (y - 1) * 36);
-    m_sprites.emplace(m_sprites.size(), m_sprite);
+    int delta;
+    if (x > 12)
+        delta = 4;
+    else
+        delta = 2;
+
+    if (hit)
+    {
+        m_sprite.setTextureRect(sf::IntRect(382, 72, 36, 36));
+        m_sprite.setPosition((x - 1) * 2 + delta + (x - 1) * 36, y * 2 + (y - 1) * 36);
+        m_sprites.emplace(m_sprites.size(), m_sprite);
+    }
+    else
+    {
+        m_sprite.setTextureRect(sf::IntRect(382, 0, 36, 36));
+        m_sprite.setPosition((x - 1) * 2 + delta + (x - 1) * 36, y * 2 + (y - 1) * 36);
+        m_sprites.emplace(m_sprites.size(), m_sprite);
+    }
 }
 
 void Graphics::makeShipSprite(int x, int y)
 {
     m_sprite.setTextureRect(sf::IntRect(382, 36, 36, 36));
-    m_sprite.setPosition(x * 2 + (x - 1) * 36, y * 2 + (y - 1) * 36);
+    m_sprite.setPosition((x - 1) * 2 + 4 + (x - 1) * 36, y * 2 + (y - 1) * 36);
     m_sprites.emplace(m_sprites.size(), m_sprite);
+}
+
+void Graphics::makeTurnSprite(int turn)
+{
+    switch (turn)
+    {
+    case 0:
+        m_sprites.find(-1)->second.setTextureRect(sf::IntRect(418, 0, 76, 382));
+        m_sprites.find(-1)->second.setPosition(382, 0);
+        break;
+
+    case 1:
+        m_sprites.find(-1)->second.setTextureRect(sf::IntRect(796, 0, 76, 382));
+        m_sprites.find(-1)->second.setPosition(382, 0);
+        break;
+
+    default:
+        break;
+    }
 }
 
 void Graphics::removeShip(int counter)
