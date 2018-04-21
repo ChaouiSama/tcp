@@ -12,8 +12,9 @@ public:
 
     void loadTexture(std::string path);
     void makeGridSprite(int type);
-    void makeHitSprite(int x, int y);
+    void makeHitSprite(int x, int y, bool hit);
     void makeShipSprite(int x, int y);
+    void makeTurnSprite(int turn);
     void removeShip(int counter);
     sf::Vector2f getSpritePos(int type);
     void setSpritePos(int type, sf::Vector2f pos);
