@@ -145,7 +145,6 @@ void ServerManager::handleDataTransfert()
         {
             if (iter->first != m_client_id)
             {
-                std::cout << "test1" << std::endl;
                 int id;
                 m_receive_packet.clear();
                 m_packet_type = PT_DATA_TRANSFERT;

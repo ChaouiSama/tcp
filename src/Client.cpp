@@ -181,15 +181,6 @@ int main(int argc, char *argv[])
                         default:
                             break;
                         }
-
-                        for (int i(0); i < ships_and_hits.board->size(); ++i)
-                        {
-                            for (int j(0); j < ships_and_hits.board->at(i).size(); ++j)
-                            {
-                                std::cout << ships_and_hits.board->at(i).at(j) << ' ';
-                            }
-                            std::cout << std::endl;
-                        }
                     }
 
                     if (game_state == GS_SHIPS_PLACEMENT && ships_and_hits.used_ship_parts == ships_and_hits.max_ship_parts && !ships_and_hits.is_placement_over)
@@ -342,8 +333,6 @@ int main(int argc, char *argv[])
                                     else if (ships_and_hits.x < ships_and_hits.prevX)
                                         ships_and_hits.dir = 4;
                                 }
-
-                                //std::cout << ships_and_hits.dir << std::endl;
                             }
 
                             if (ships_and_hits.ship_parts_placed_in_a_row >= 1)
