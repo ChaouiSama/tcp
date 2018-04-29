@@ -47,6 +47,7 @@ int main(int argc, char *argv[])
         int mouseY;
         int x;
         int y;
+        sf::Vector2i last_part_pos;
 
         int max_ship_parts = 17;
         int used_ship_parts = 0;
@@ -150,30 +151,30 @@ int main(int argc, char *argv[])
                         switch (ships_and_hits.dir)
                         {
                         case 1:
-                            for (int i(ships_and_hits.y  - ships_and_hits.ship_parts_placed_in_a_row); i < ships_and_hits.y ; ++i)
+                            for (int i(ships_and_hits.last_part_pos.y - ships_and_hits.ship_parts_placed_in_a_row); i < ships_and_hits.last_part_pos.y ; ++i)
                             {
-                                ships_and_hits.board->at(i).at(ships_and_hits.x - 13) = 1;
+                                ships_and_hits.board->at(i).at(ships_and_hits.last_part_pos.x - 13) = 1;
                             }
                             break;
 
                         case 2:
-                            for (int i(ships_and_hits.x - 12 - ships_and_hits.ship_parts_placed_in_a_row); i < ships_and_hits.x - 12; ++i)
+                            for (int i(ships_and_hits.last_part_pos.x - 12 - ships_and_hits.ship_parts_placed_in_a_row); i < ships_and_hits.last_part_pos.x - 12; ++i)
                             {
-                                ships_and_hits.board->at(ships_and_hits.y - 1).at(i) = 1;
+                                ships_and_hits.board->at(ships_and_hits.last_part_pos.y - 1).at(i) = 1;
                             }
                             break;
 							
 						case 3:
-                            for (int i(ships_and_hits.y - 2 + ships_and_hits.ship_parts_placed_in_a_row); i > ships_and_hits.y - 2; --i)
+                            for (int i(ships_and_hits.last_part_pos.y - 2 + ships_and_hits.ship_parts_placed_in_a_row); i > ships_and_hits.last_part_pos.y - 2; --i)
                             {
-                                ships_and_hits.board->at(i).at(ships_and_hits.x - 13) = 1;
+                                ships_and_hits.board->at(i).at(ships_and_hits.last_part_pos.x - 13) = 1;
                             }
                             break;
 
                         case 4:
-                            for (int i(ships_and_hits.x - 14 + ships_and_hits.ship_parts_placed_in_a_row); i > ships_and_hits.x - 14; --i)
+                            for (int i(ships_and_hits.last_part_pos.x - 14 + ships_and_hits.ship_parts_placed_in_a_row); i > ships_and_hits.last_part_pos.x - 14; --i)
                             {
-                                ships_and_hits.board->at(ships_and_hits.y - 1).at(i) = 1;
+                                ships_and_hits.board->at(ships_and_hits.last_part_pos.y - 1).at(i) = 1;
                             }
                             break;
 
@@ -342,7 +343,7 @@ int main(int argc, char *argv[])
 										ships_and_hits.dir = 4;
 								}
 								
-								std::cout << ships_and_hits.dir << std::endl;
+								//std::cout << ships_and_hits.dir << std::endl;
                             }
 
                             if (ships_and_hits.ship_parts_placed_in_a_row >= 1)
@@ -354,6 +355,8 @@ int main(int argc, char *argv[])
                                     {
                                         ships_and_hits.is_ship_incorrect = true;
                                     }
+                                    ships_and_hits.last_part_pos.x = ships_and_hits.x;
+                                    ships_and_hits.last_part_pos.y = ships_and_hits.y;
                                     break;
 
                                 case 2:
@@ -361,6 +364,8 @@ int main(int argc, char *argv[])
                                     {
                                         ships_and_hits.is_ship_incorrect = true;
                                     }
+                                    ships_and_hits.last_part_pos.x = ships_and_hits.x;
+                                    ships_and_hits.last_part_pos.y = ships_and_hits.y;
                                     break;
 									
 								case 3:
@@ -368,6 +373,8 @@ int main(int argc, char *argv[])
                                     {
                                         ships_and_hits.is_ship_incorrect = true;
                                     }
+                                    ships_and_hits.last_part_pos.x = ships_and_hits.x;
+                                    ships_and_hits.last_part_pos.y = ships_and_hits.y;
                                     break;
 
                                 case 4:
@@ -375,6 +382,8 @@ int main(int argc, char *argv[])
                                     {
                                         ships_and_hits.is_ship_incorrect = true;
                                     }
+                                    ships_and_hits.last_part_pos.x = ships_and_hits.x;
+                                    ships_and_hits.last_part_pos.y = ships_and_hits.y;
                                     break;
 
                                 default:
@@ -388,7 +397,6 @@ int main(int argc, char *argv[])
                             ships_and_hits.used_ship_parts++;
                             ships_and_hits.ship_parts_placed_in_a_row++;
                         }
-
                         break;
                     }
                 }

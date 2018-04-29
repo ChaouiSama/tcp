@@ -145,6 +145,8 @@ void ServerManager::handleDataTransfert()
         {
             if (iter->first != m_client_id)
             {
+                std::cout << "test1" << std::endl;
+                int id;
                 m_receive_packet.clear();
                 m_packet_type = PT_DATA_TRANSFERT;
                 m_action_type = PT_HIT_PLACEMENT;
@@ -153,13 +155,22 @@ void ServerManager::handleDataTransfert()
                 {
                     m_send_packet << true;
                 }
+                else if (iter->second.at(m_y - 1).at(m_x - 1) == 2)
+                {
+                    m_send_packet.clear();
+                    id = m_client_id;
+                    m_action_type = PT_NEW_TURN;
+                    m_send_packet << m_packet_type << m_action_type << id;
+                    sendToAll(m_send_packet);
+                    break;
+                }
                 else
                 {
                     m_send_packet << false;
                 }
                 iter->second.at(m_y - 1).at(m_x - 1) = 2;
                 sendToAll(m_send_packet);
-                int id = iter->first;
+                id = iter->first;
                 m_action_type = PT_NEW_TURN;
                 m_send_packet << m_packet_type << m_action_type << id;
                 sendToAll(m_send_packet);
