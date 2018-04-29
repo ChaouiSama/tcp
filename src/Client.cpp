@@ -93,10 +93,10 @@ int main(int argc, char *argv[])
 
     for (int i(0); i < argc; ++i)
     {
-    if (std::strcmp(argv[i], "-ip") == 0)
-    address = argv[i + 1];
-    else if (std::strcmp(argv[i], "-port") == 0)
-    port = (unsigned short)std::strtoul(argv[i + 1], NULL, 0);
+        if (std::strcmp(argv[i], "-ip") == 0)
+            address = argv[i + 1];
+        else if (std::strcmp(argv[i], "-port") == 0)
+            port = (unsigned short)std::strtoul(argv[i + 1], NULL, 0);
     }
 
     sf::RenderWindow *window = new sf::RenderWindow(sf::VideoMode(WIDTH, HEIGHT, sf::VideoMode::getDesktopMode().bitsPerPixel), "test", sf::Style::Close, sf::ContextSettings(0, 0, 8, 1, 1, false));
