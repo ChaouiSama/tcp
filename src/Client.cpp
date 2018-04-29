@@ -7,7 +7,7 @@
 
 int main(int argc, char *argv[])
 {
-	const int WIDTH(840), HEIGHT(382);
+    const int WIDTH(840), HEIGHT(382);
 
     sf::IpAddress address;
     unsigned short port;
@@ -90,14 +90,14 @@ int main(int argc, char *argv[])
             ships_and_hits.board->at(i).at(j) = 0;
         }
     }
-	
-	for (int i(0); i < argc; ++i)
-	{
-		if (std::strcmp(argv[i], "-ip") == 0)
-			address = argv[i + 1];
-		else if (std::strcmp(argv[i], "-port") == 0)
-			port = (unsigned short)std::strtoul(argv[i + 1], NULL, 0);
-	}
+
+    for (int i(0); i < argc; ++i)
+    {
+    if (std::strcmp(argv[i], "-ip") == 0)
+    address = argv[i + 1];
+    else if (std::strcmp(argv[i], "-port") == 0)
+    port = (unsigned short)std::strtoul(argv[i + 1], NULL, 0);
+    }
 
     sf::RenderWindow *window = new sf::RenderWindow(sf::VideoMode(WIDTH, HEIGHT, sf::VideoMode::getDesktopMode().bitsPerPixel), "test", sf::Style::Close, sf::ContextSettings(0, 0, 8, 1, 1, false));
     window->setFramerateLimit(120);
@@ -147,7 +147,7 @@ int main(int argc, char *argv[])
                     if (!ships_and_hits.is_ship_incorrect)
                     {
                         ships_and_hits.ships_available.find(ships_and_hits.ship_parts_placed_in_a_row)->second--;
-                        
+
                         switch (ships_and_hits.dir)
                         {
                         case 1:
@@ -163,8 +163,8 @@ int main(int argc, char *argv[])
                                 ships_and_hits.board->at(ships_and_hits.last_part_pos.y - 1).at(i) = 1;
                             }
                             break;
-							
-						case 3:
+
+                        case 3:
                             for (int i(ships_and_hits.last_part_pos.y - 2 + ships_and_hits.ship_parts_placed_in_a_row); i > ships_and_hits.last_part_pos.y - 2; --i)
                             {
                                 ships_and_hits.board->at(i).at(ships_and_hits.last_part_pos.x - 13) = 1;
@@ -181,14 +181,14 @@ int main(int argc, char *argv[])
                         default:
                             break;
                         }
-						
-						for (int i(0); i < ships_and_hits.board->size(); ++i)
+
+                        for (int i(0); i < ships_and_hits.board->size(); ++i)
                         {
                             for (int j(0); j < ships_and_hits.board->at(i).size(); ++j)
                             {
                                 std::cout << ships_and_hits.board->at(i).at(j) << ' ';
                             }
-							std::cout << std::endl;
+                            std::cout << std::endl;
                         }
                     }
 
@@ -309,7 +309,7 @@ int main(int argc, char *argv[])
                 game_state = GS_PLAYER2_TURN;
             }
         }
-        
+
         if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && window->hasFocus() && game_state == GS_SHIPS_PLACEMENT)
         {
             ships_and_hits.mouseX = sf::Mouse::getPosition(*window).x;
@@ -329,21 +329,21 @@ int main(int argc, char *argv[])
                             if (ships_and_hits.ship_parts_placed_in_a_row == 1)
                             {
                                 if (ships_and_hits.x == ships_and_hits.prevX && ships_and_hits.y != ships_and_hits.prevY)
-								{
-									if (ships_and_hits.y > ships_and_hits.prevY)
-										ships_and_hits.dir = 1;
-									else if (ships_and_hits.y < ships_and_hits.prevY)
-										ships_and_hits.dir = 3;
-                                }
-								else if (ships_and_hits.x != ships_and_hits.prevX && ships_and_hits.y == ships_and_hits.prevY)
                                 {
-									if (ships_and_hits.x > ships_and_hits.prevX)
-										ships_and_hits.dir = 2;
-									else if (ships_and_hits.x < ships_and_hits.prevX)
-										ships_and_hits.dir = 4;
-								}
-								
-								//std::cout << ships_and_hits.dir << std::endl;
+                                    if (ships_and_hits.y > ships_and_hits.prevY)
+                                        ships_and_hits.dir = 1;
+                                    else if (ships_and_hits.y < ships_and_hits.prevY)
+                                        ships_and_hits.dir = 3;
+                                }
+                                else if (ships_and_hits.x != ships_and_hits.prevX && ships_and_hits.y == ships_and_hits.prevY)
+                                {
+                                    if (ships_and_hits.x > ships_and_hits.prevX)
+                                        ships_and_hits.dir = 2;
+                                    else if (ships_and_hits.x < ships_and_hits.prevX)
+                                        ships_and_hits.dir = 4;
+                                }
+
+                                //std::cout << ships_and_hits.dir << std::endl;
                             }
 
                             if (ships_and_hits.ship_parts_placed_in_a_row >= 1)
@@ -367,8 +367,8 @@ int main(int argc, char *argv[])
                                     ships_and_hits.last_part_pos.x = ships_and_hits.x;
                                     ships_and_hits.last_part_pos.y = ships_and_hits.y;
                                     break;
-									
-								case 3:
+
+                                case 3:
                                     if (ships_and_hits.x != ships_and_hits.prevX && ships_and_hits.y == ships_and_hits.prevY)
                                     {
                                         ships_and_hits.is_ship_incorrect = true;
