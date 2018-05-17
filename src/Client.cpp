@@ -1,5 +1,5 @@
 #include "ClientNetworkManager.hpp"
-#include "Player.hpp"
+#include "ClientManager.hpp"
 #include "Graphics.hpp"
 #include <cmath>
 #include <cstring>
@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
     sf::Uint8 packet_type;
     sf::Uint8 action_type;
 
-    Player player;
+    ClientManager client_manager;
 
     float x;
     float y;
@@ -138,9 +138,19 @@ int main(int argc, char *argv[])
             case sf::Event::MouseButtonReleased:
                 if (event.mouseButton.button == sf::Mouse::Button::Left)
                 {
+                    bool ships_overlapping = client_manager.shipsOverlapping(ships_and_hits.board, &ships_and_hits.last_part_pos.x, 
+                        &ships_and_hits.last_part_pos.y, &ships_and_hits.dir, &ships_and_hits.ship_parts_placed_in_a_row);
+                    bool ships_adjoined = client_manager.shipsAdjoined(ships_and_hits.board, &ships_and_hits.last_part_pos.x, 
+                        &ships_and_hits.last_part_pos.y, &ships_and_hits.dir, &ships_and_hits.ship_parts_placed_in_a_row);
+                    if (ships_overlapping || ships_adjoined)
+                    {
+                        ships_and_hits.is_ship_incorrect = true;
+                    }
+
                     if (ships_and_hits.ships_available.find(ships_and_hits.ship_parts_placed_in_a_row)->second <= 0 || ships_and_hits.is_ship_incorrect)
                     {
                         graphics.removeShip(ships_and_hits.ship_parts_placed_in_a_row);
+                        ships_and_hits.is_ship_incorrect = true;
                         ships_and_hits.max_ship_parts += ships_and_hits.ship_parts_placed_in_a_row;
                     }
 
@@ -226,14 +236,14 @@ int main(int argc, char *argv[])
                     receive_packet >> my_client_id;
                     receive_packet.clear();
                     std::cout << "my_client_id: " << my_client_id << std::endl;
-                    player.addPlayer(my_client_id);
+                    client_manager.addClient(my_client_id);
                 }
                 else
                 {
                     receive_packet >> client_id;
                     receive_packet.clear();
                     std::cout << "client_id: " << client_id << std::endl;
-                    player.addPlayer(client_id);
+                    client_manager.addClient(client_id);
                 }
                 break;
 
@@ -274,7 +284,7 @@ int main(int argc, char *argv[])
                 receive_packet >> client_id;
                 receive_packet.clear();
                 std::cout << "deconnection packet received from client_id[" << client_id << "]" << std::endl;
-                player.getPlayerList()->erase(std::find(player.getPlayerList()->begin(), player.getPlayerList()->end(), client_id));
+                client_manager.getClientList()->erase(std::find(client_manager.getClientList()->begin(), client_manager.getClientList()->end(), client_id));
                 break;
 
             default:
